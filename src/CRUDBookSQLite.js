@@ -9,7 +9,7 @@ app.use (express.json());
 
 db.run(`CREATE TABLE IF NOT EXISTS books (
     id INTEGER PRIMARY KEY,
-    title TEXT,
+    titile TEXT,
     author TEXT
 )`);
 
@@ -71,4 +71,4 @@ app.delete('/book/:id', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port http://localhost:${port}`));
+app.listen(port, () => console.log(`Listening on port ${port}...`));
