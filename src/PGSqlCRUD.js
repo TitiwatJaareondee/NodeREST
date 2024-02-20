@@ -1,9 +1,85 @@
-const express = require('express');
-const Sequelize = require('sequelize');
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+
+mongoose.connect(
+    "mongodb://admin:VANdol17101@node56942-titiwat28-noderest.proen.app.ruk-com.cloud:11780",
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    }
+);
+
+const Book = mongoose.model("Book", {
+    id: {
+        type: Number,
+        unique: true,
+        required : true,
+    },
+    title: String,
+    author: String,
+});
+
 const app = express();
+app.use(bodyParser.json());
 
-app.use(express.json());
+app.post("/books", async (req, res) => {
+    try {
+        const lastBook = await Book.findOne().sort({ id: -1});
+        const nextId = lastBook ? lastBook.id + 1 : 1;
 
-const dbUrl = 'postgres://webadmin:RVStny62748@node56940-titiwat28-noderest.proen.app.ruk-com.cloud:11605/Books';
+        const book = new Book({
+            id: nextId,
+            ...req.body,
+        });
 
-const sequelize = new Sequelize(dbUrl);
+        await book.save();
+        res.send(book);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+app.get("/books" ,async (req, res) => {
+    try {
+        const books = await Book.find();
+        res.send(books);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.get("/books/:id", async (req, res) => {
+    try{
+        const book = await Book.findOne({id:req.params.id});
+        res.send(book);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}); 
+
+app.put("/books/:id", async (req, res) => {
+    try {
+        const book = await Book.findOneAndUpdate({id:req.params.id}, req.body, {
+            new: true,
+        });
+        res.send(book);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.delete("/books/:id", async (req, res) => {
+    try {
+        const book = await Book.findOneAndDelete({id:req.params.id});
+        res.send(book);
+    } catch (error) {
+        res.status(500).send(error);
+        }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Sever Start at http://localhost:${PORT}`);
+});
